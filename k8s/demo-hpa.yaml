@@ -1,3 +1,9 @@
+# HPA Scale to Zero (Alpha) — requires HPAScaleToZero feature gate.
+# This manifest uses minReplicas: 1 so it deploys on any cluster.
+# To test scale-to-zero, start Minikube with:
+#   minikube start --feature-gates=HPAScaleToZero=true
+# Then change minReplicas to 0 AND use an Object/External metric
+# (Resource metrics alone cannot drive scale-to-zero).
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -8,7 +14,7 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: demo-app
-  minReplicas: 0  # Scale to zero when idle (requires HPAScaleToZero feature gate)
+  minReplicas: 1   # Change to 0 when HPAScaleToZero feature gate is enabled
   maxReplicas: 10
   metrics:
   - type: Resource
@@ -23,6 +29,19 @@ spec:
       target:
         type: Utilization
         averageUtilization: 70
+  # Uncomment the Object metric below when testing scale-to-zero.
+  # At least one Object or External metric is required for minReplicas: 0.
+  # - type: Object
+  #   object:
+  #     metric:
+  #       name: requests-per-second
+  #     describedObject:
+  #       apiVersion: networking.k8s.io/v1
+  #       kind: Ingress
+  #       name: demo-app-ingress
+  #     target:
+  #       type: Value
+  #       value: 10
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 300

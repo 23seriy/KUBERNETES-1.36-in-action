@@ -43,9 +43,8 @@ fi
 info "Setting kubectl context to '$PROFILE'..."
 kubectl config use-context "$PROFILE"
 
-# Enable required addons
+# Enable required addons (ingress is not used by the demo)
 info "Enabling Minikube addons..."
-minikube addons enable ingress -p "$PROFILE" || true
 minikube addons enable metrics-server -p "$PROFILE" || true
 
 # Wait for control plane
