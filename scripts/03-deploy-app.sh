@@ -38,7 +38,7 @@ kubectl apply -f "$PROJECT_DIR/k8s/demo-app-service.yaml"
 kubectl apply -f "$PROJECT_DIR/k8s/demo-network-policy.yaml"
 kubectl apply -f "$PROJECT_DIR/k8s/demo-resource-quota.yaml"
 kubectl apply -f "$PROJECT_DIR/k8s/demo-monitoring-pod.yaml"
-kubectl apply -f "$PROJECT_DIR/k8s/demo-hpa.yaml"
+kubectl apply -f "$PROJECT_DIR/k8s/demo-hpa.yaml" || warn "HPA creation failed (scale-to-zero requires HPAScaleToZero feature gate + Object/External metric)"
 
 # Wait for key components
 info "Waiting for demo app deployment..."

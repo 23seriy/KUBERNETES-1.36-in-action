@@ -1,5 +1,7 @@
 # User Namespaces (GA in 1.36) — container root maps to unprivileged host UID
 # Requires: Linux kernel 5.12+ with ID-mapped mount support, compatible runtime
+# Note: Minikube with Docker driver does NOT support this. Use containerd:
+#   minikube start --container-runtime=containerd
 apiVersion: v1
 kind: Pod
 metadata:

@@ -6,7 +6,7 @@ metadata:
   labels:
     app: demo-app
 spec:
-  replicas: 3
+  replicas: 1  # RWO PVCs can only be mounted by one pod at a time
   selector:
     matchLabels:
       app: demo-app
@@ -18,8 +18,9 @@ spec:
       # WAS v1alpha2: link pods to the runtime PodGroup (requires feature gate)
       # schedulingGroup:
       #   podGroupName: demo-app-podgroup
-      # User Namespaces (GA): root inside, unprivileged on the host
-      hostUsers: false
+      # User Namespaces (GA) — demonstrated separately in user-namespaces-pod.yaml
+      # Uncomment below on runtimes that support it (containerd 2.x + kernel 5.12+):
+      # hostUsers: false
       serviceAccountName: demo-monitoring-sa
       containers:
       - name: web-server
