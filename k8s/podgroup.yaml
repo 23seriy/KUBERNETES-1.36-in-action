@@ -1,0 +1,31 @@
+# Workload Aware Scheduling (Alpha in 1.36) — v1alpha2 API
+# The Workload is a static template; the PodGroup handles runtime state
+# Requires: WorkloadAwareScheduling feature gate
+
+# Step 1: Workload — defines the pod group structure as a template
+apiVersion: scheduling.k8s.io/v1alpha2
+kind: Workload
+metadata:
+  name: demo-app-workload
+  namespace: k8s136-demo
+spec:
+  podGroupTemplates:
+  - name: app-workers
+    schedulingPolicy:
+      gang:
+        minCount: 3  # All 3 must be schedulable or none are bound
+---
+# Step 2: PodGroup — the runtime object created from the template
+apiVersion: scheduling.k8s.io/v1alpha2
+kind: PodGroup
+metadata:
+  name: demo-app-podgroup
+  namespace: k8s136-demo
+spec:
+  podGroupTemplateRef:
+    workload:
+      workloadName: demo-app-workload
+      podGroupTemplateName: app-workers
+  schedulingPolicy:
+    gang:
+      minCount: 3

@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: demo-monitoring
+  namespace: k8s136-demo
+  labels:
+    app: demo-monitoring
+spec:
+  serviceAccountName: demo-monitoring-sa
+  containers:
+  - name: monitoring
+    image: curlimages/curl
+    command:
+    - /bin/sh
+    - -c
+    - |
+      echo "Testing fine-grained kubelet authorization..."
+
+      echo "Testing /healthz endpoint:"
+      curl -k -s https://kubernetes.default.svc:10250/healthz || echo "Access denied (expected)"
+
+      echo "Testing /metrics endpoint:"
+      curl -k -s https://kubernetes.default.svc:10250/metrics | head -5 || echo "Access denied (expected)"
+
+      echo "Testing /pods endpoint (should be denied):"
+      curl -k -s https://kubernetes.default.svc:10250/pods || echo "Access denied (expected)"
+
+      echo "Monitoring test completed. Sleeping..."
+      sleep 3600
+    resources:
+      requests:
+        memory: "32Mi"
+        cpu: "10m"
+      limits:
+        memory: "64Mi"
+        cpu: "20m"
+  restartPolicy: Always

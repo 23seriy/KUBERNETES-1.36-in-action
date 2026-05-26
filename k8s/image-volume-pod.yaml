@@ -1,0 +1,42 @@
+# ImageVolume / OCI Artifacts (GA in 1.36) — mount OCI images as volumes
+# No init containers, no sidecar pattern, no build-time bloat
+apiVersion: v1
+kind: Pod
+metadata:
+  name: image-volume-demo
+  namespace: k8s136-demo
+  labels:
+    demo: image-volume
+spec:
+  containers:
+  - name: app
+    image: busybox
+    command:
+    - /bin/sh
+    - -c
+    - |
+      echo "=== ImageVolume Demo ==="
+      echo "Contents mounted from OCI artifact:"
+      ls -la /oci-data/
+      echo ""
+      echo "This data came from an OCI image, mounted read-only as a volume."
+      echo "No init container. No sidecar. Just a volume reference."
+      echo ""
+      echo "Attempting write (should fail — read-only mount):"
+      touch /oci-data/test 2>&1 || echo "Write denied as expected."
+      sleep 3600
+    volumeMounts:
+    - name: oci-content
+      mountPath: /oci-data
+    resources:
+      requests:
+        memory: "32Mi"
+        cpu: "10m"
+      limits:
+        memory: "64Mi"
+        cpu: "50m"
+  volumes:
+  - name: oci-content
+    image:
+      reference: busybox:latest
+      pullPolicy: IfNotPresent

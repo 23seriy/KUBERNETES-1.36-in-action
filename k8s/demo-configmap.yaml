@@ -1,0 +1,55 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: demo-config
+  namespace: k8s136-demo
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Kubernetes 1.36 Demo</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 40px; background: #f0f8ff; }
+            .feature { background: white; padding: 20px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+            .stable { border-left: 5px solid #28a745; }
+            .beta { border-left: 5px solid #ffc107; }
+            .alpha { border-left: 5px solid #dc3545; }
+            h1 { color: #007bff; }
+            h2 { margin-top: 0; }
+        </style>
+    </head>
+    <body>
+        <h1>🌸 Kubernetes 1.36 "ハル (Haru)" Demo Application</h1>
+
+        <div class="feature stable">
+            <h2>🟢 Stable Features</h2>
+            <ul>
+                <li><strong>Fine-grained Kubelet Authorization</strong>: Precise API access control</li>
+                <li><strong>Volume Group Snapshots</strong>: Multi-volume consistent backups</li>
+                <li><strong>External SA Token Signing</strong>: Offloaded token management</li>
+            </ul>
+        </div>
+
+        <div class="feature beta">
+            <h2>🟡 Beta Features</h2>
+            <ul>
+                <li><strong>Resource Health Status</strong>: Hardware health monitoring</li>
+                <li><strong>Mixed Version Proxy</strong>: Seamless upgrades</li>
+                <li><strong>Memory QoS</strong>: Advanced memory management</li>
+            </ul>
+        </div>
+
+        <div class="feature alpha">
+            <h2>🔴 Alpha Features</h2>
+            <ul>
+                <li><strong>Workload Aware Scheduling</strong>: Gang scheduling</li>
+                <li><strong>HPA Scale to Zero</strong>: True serverless scaling</li>
+                <li><strong>Native Histograms</strong>: Enhanced metrics</li>
+            </ul>
+        </div>
+
+        <p><em>This demo application showcases multiple Kubernetes 1.36 features working together.</em></p>
+        <p><strong>Deployment time:</strong> <script>document.write(new Date().toLocaleString());</script></p>
+    </body>
+    </html>

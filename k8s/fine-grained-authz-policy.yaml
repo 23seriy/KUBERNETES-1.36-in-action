@@ -1,0 +1,14 @@
+apiVersion: node.k8s.io/v1
+kind: KubeletAuthorizationPolicy
+metadata:
+  name: demo-monitoring-policy
+  namespace: k8s136-demo
+spec:
+  rules:
+  - subjects:
+    - kind: ServiceAccount
+      name: demo-monitoring-sa
+      namespace: k8s136-demo
+    nonResourceRules:
+    - nonResourceURLs: ["/metrics", "/healthz"]
+      verbs: ["get"]

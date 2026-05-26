@@ -1,0 +1,34 @@
+# User Namespaces (GA in 1.36) — container root maps to unprivileged host UID
+# Requires: Linux kernel 5.12+ with ID-mapped mount support, compatible runtime
+apiVersion: v1
+kind: Pod
+metadata:
+  name: user-ns-demo
+  namespace: k8s136-demo
+  labels:
+    demo: user-namespaces
+spec:
+  hostUsers: false  # The only change needed — root inside, nobody on the host
+  containers:
+  - name: test
+    image: busybox
+    command:
+    - /bin/sh
+    - -c
+    - |
+      echo "=== User Namespaces Demo ==="
+      echo "Inside container:"
+      id
+      echo ""
+      echo "I appear to be root, but on the host I'm mapped to an unprivileged UID."
+      echo "If an attacker escapes this container, they land as nobody on the host."
+      sleep 3600
+    securityContext:
+      runAsUser: 0
+    resources:
+      requests:
+        memory: "32Mi"
+        cpu: "10m"
+      limits:
+        memory: "64Mi"
+        cpu: "50m"

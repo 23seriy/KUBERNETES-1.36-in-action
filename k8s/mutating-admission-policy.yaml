@@ -1,0 +1,36 @@
+# MutatingAdmissionPolicy (GA in 1.36) — replace webhooks with native CEL
+# No webhook server, no TLS certs, no 2am incidents
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingAdmissionPolicy
+metadata:
+  name: demo-label-injector
+spec:
+  reinvocationPolicy: Never
+  matchConstraints:
+    resourceRules:
+    - apiGroups: [""]
+      apiVersions: ["v1"]
+      operations: ["CREATE"]
+      resources: ["pods"]
+    namespaceSelector:
+      matchLabels:
+        demo: kubernetes-1.36
+  mutations:
+  - patchType: "ApplyConfiguration"
+    applyConfiguration:
+      expression: >
+        Object{
+          metadata: Object.metadata{
+            labels: {"managed-by": "k8s136-cel-policy", "demo": "mutating-admission"}
+          }
+        }
+---
+# Binding to activate the policy
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingAdmissionPolicyBinding
+metadata:
+  name: demo-label-injector-binding
+spec:
+  policyName: demo-label-injector
+  validationActions:
+  - Deny
