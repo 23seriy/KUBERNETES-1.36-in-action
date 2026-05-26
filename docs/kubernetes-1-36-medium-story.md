@@ -120,6 +120,8 @@ uid=0(root) gid=0(root) groups=0(root)
 
 The road to GA wasn't just about the API — it required kernel-level work on **ID-mapped mounts** (Linux 5.12+) so volumes don't need recursive `chown` at startup. Instead, the kernel remaps ownership at mount time — an O(1) operation instead of walking every file.
 
+**Runtime Requirements:** User Namespaces needs a container runtime that supports it (containerd 2.x or CRI-O 1.25+) and a Linux kernel ≥ 5.12 for ID-mapped mounts. The Docker runtime in Minikube does **not** support it yet — use containerd-based clusters or production distributions.
+
 **Why This Matters:**
 - **Multi-tenant clusters**: Container escapes no longer grant host root
 - **Compliance**: Meets strict isolation requirements without sacrificing functionality
@@ -352,6 +354,8 @@ spec:
         averageValue: "10"
 ```
 
+> **Note:** Scale-to-zero requires the `HPAScaleToZero` feature gate (alpha, off by default) **and** at least one Object or External metric. Standard Resource metrics (cpu/memory) alone cannot drive scale-to-zero. Start Minikube with `--feature-gates=HPAScaleToZero=true` to experiment.
+
 ## 📊 Performance and Reliability Improvements
 
 ### Memory QoS with cgroups v2
@@ -437,7 +441,7 @@ systemctl restart kubelet
 ## 📝 What to Adopt (A Pragmatic Guide)
 
 **Adopt now:**
-- User Namespaces (`hostUsers: false`) — one-line change, massive security improvement
+- User Namespaces (`hostUsers: false`) — one-line change, massive security improvement (requires containerd 2.x or CRI-O)
 - MutatingAdmissionPolicy — port one webhook as a proof of concept
 - Fine-grained kubelet authorization — GA and locked on, verify your CIS benchmark
 - Plan your Ingress NGINX migration to Gateway API

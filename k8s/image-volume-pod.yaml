@@ -1,5 +1,7 @@
 # ImageVolume / OCI Artifacts (GA in 1.36) — mount OCI images as volumes
 # No init containers, no sidecar pattern, no build-time bloat
+# Note: Requires ImageVolume feature gate. On Minikube:
+#   minikube start --feature-gates=ImageVolume=true
 apiVersion: v1
 kind: Pod
 metadata:

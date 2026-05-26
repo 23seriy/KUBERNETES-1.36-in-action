@@ -17,7 +17,7 @@ Instead of just reading release notes, this project lets you **deploy, test, and
                  │                 Minikube Cluster                  │
                  │                                                  │
  User ────────►  │  Complete Demo App (multi-feature showcase)       │
-                 │  • User Namespaces (hostUsers: false)             │
+                 │  • User Namespaces pod (hostUsers: false)          │
                  │  • MutatingAdmissionPolicy (CEL labels)           │
                  │  • Fine-grained kubelet authorization             │
                  │  • Multi-PVC setup for group snapshots            │
@@ -126,12 +126,12 @@ The demo includes **9 guided scenarios** covering all major feature areas:
 
 ## 🔍 How the Demo Works
 
-- **User Namespaces** — demo app runs with `hostUsers: false`; separate pod verifies UID mapping
+- **User Namespaces** — dedicated pod runs with `hostUsers: false` (requires containerd 2.x + kernel 5.12+)
 - **MutatingAdmissionPolicy** — CEL policy auto-injects labels on pod creation
 - **Fine-grained authz** service account demonstrates least-privilege kubelet access
 - **Multi-PVC setup** (data + logs) enables volume group snapshot testing
 - **ImageVolume** pod mounts an OCI artifact directly as a read-only volume
-- **HPA with minReplicas: 0** demonstrates scale-to-zero capability
+- **HPA** defaults to `minReplicas: 1`; see `demo-hpa.yaml` comments for scale-to-zero setup
 - **Workload + PodGroup v1alpha2** manifests demonstrate gang scheduling primitives
 - **NetworkPolicy + ResourceQuota** show security best practices
 - **Feature-specific directories** contain standalone examples for deeper exploration
@@ -142,10 +142,10 @@ The demo includes **9 guided scenarios** covering all major feature areas:
 kubernetes-1.36-in-action/
 ├── k8s/                                # Kubernetes manifests (deploy target)
 │   ├── namespace.yaml
-│   ├── demo-app.yaml                  # Multi-container Deployment (hostUsers: false)
+│   ├── demo-app.yaml                  # Multi-container Deployment
 │   ├── demo-app-service.yaml
 │   ├── demo-configmap.yaml            # Demo landing page
-│   ├── demo-hpa.yaml                  # HPA with scale-to-zero
+│   ├── demo-hpa.yaml                  # HPA (scale-to-zero instructions inside)
 │   ├── demo-monitoring-sa.yaml
 │   ├── demo-monitoring-pod.yaml       # Fine-grained authz test pod
 │   ├── demo-pvcs.yaml                 # Multi-PVC for group snapshots
