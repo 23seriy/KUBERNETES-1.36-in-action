@@ -8,7 +8,7 @@ Instead of just reading release notes, this project lets you **deploy, test, and
 ![Minikube](https://img.shields.io/badge/Minikube-local-F7B93E?logo=kubernetes&logoColor=white)
 ![Shell](https://img.shields.io/badge/Shell-Bash-4EAA25?logo=gnu-bash&logoColor=white)
 
-> 📝 **Published article:** [Kubernetes 1.36 "ハル (Haru)": The Future of Container Orchestration is Here](docs/kubernetes-1-36-medium-story.md) — also available on [Medium](https://medium.com/@sergeiolshanetski)
+> 📝 **Published article:** [Kubernetes 1.36 "ハル (Haru)": The Future of Container Orchestration is Here](https://medium.com/@sergeiolshanetski/kubernetes-1-36-%E3%83%8F%E3%83%AB-haru-the-future-of-container-orchestration-is-here-232dbc1592c7)
 
 ## 🏗️ Architecture
 
@@ -172,8 +172,6 @@ kubernetes-1.36-in-action/
 │   ├── 03-deploy-app.sh
 │   ├── 04-demo-scenarios.sh
 │   └── 05-teardown.sh
-└── docs/
-    └── kubernetes-1-36-medium-story.md
 ```
 
 ## 🧹 Teardown
