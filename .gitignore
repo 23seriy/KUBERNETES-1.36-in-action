@@ -12,3 +12,4 @@ minikube-profiles/
 *.pem
 *.key
 *.crt
+.serena
