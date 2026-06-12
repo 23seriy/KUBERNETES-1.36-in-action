@@ -10,35 +10,46 @@ metadata:
   labels:
     demo: image-volume
 spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65532
+    runAsGroup: 65532
+    seccompProfile:
+      type: RuntimeDefault
   containers:
-  - name: app
-    image: busybox
-    command:
-    - /bin/sh
-    - -c
-    - |
-      echo "=== ImageVolume Demo ==="
-      echo "Contents mounted from OCI artifact:"
-      ls -la /oci-data/
-      echo ""
-      echo "This data came from an OCI image, mounted read-only as a volume."
-      echo "No init container. No sidecar. Just a volume reference."
-      echo ""
-      echo "Attempting write (should fail — read-only mount):"
-      touch /oci-data/test 2>&1 || echo "Write denied as expected."
-      sleep 3600
-    volumeMounts:
-    - name: oci-content
-      mountPath: /oci-data
-    resources:
-      requests:
-        memory: "32Mi"
-        cpu: "10m"
-      limits:
-        memory: "64Mi"
-        cpu: "50m"
+    - name: app
+      image: busybox:1.36
+      command:
+        - /bin/sh
+        - -c
+        - |
+          echo "=== ImageVolume Demo ==="
+          echo "Contents mounted from OCI artifact:"
+          ls -la /oci-data/
+          echo ""
+          echo "This data came from an OCI image, mounted read-only as a volume."
+          echo "No init container. No sidecar. Just a volume reference."
+          echo ""
+          echo "Attempting write (should fail — read-only mount):"
+          touch /oci-data/test 2>&1 || echo "Write denied as expected."
+          sleep 3600
+      volumeMounts:
+        - name: oci-content
+          mountPath: /oci-data
+      resources:
+        requests:
+          memory: "32Mi"
+          cpu: "10m"
+        limits:
+          memory: "64Mi"
+          cpu: "50m"
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop: ["ALL"]
   volumes:
-  - name: oci-content
-    image:
-      reference: busybox:latest
-      pullPolicy: IfNotPresent
+    - name: oci-content
+      image:
+        reference: busybox:1.36
+        pullPolicy: IfNotPresent

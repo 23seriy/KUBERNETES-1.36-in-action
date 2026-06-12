@@ -4,3 +4,10 @@ metadata:
   name: k8s136-demo
   labels:
     demo: kubernetes-1.36
+    # Pod Security Standards (Pod Security Admission).
+    # `baseline` is enforced so the User Namespaces demo (runAsUser: 0 with
+    # hostUsers: false) is allowed. `restricted` is audited/warned for everything
+    # else — non-demo workloads should still aim for the stricter profile.
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted

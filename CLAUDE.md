@@ -6,8 +6,9 @@ Hands-on demo of **Kubernetes 1.36 "ハル (Haru)"** features through practical 
 
 ## Tech Stack
 
-- **Platform**: Minikube (profile: `k136-demo`) running Kubernetes 1.36
-- **Tools**: kubectl, minikube
+- **Platform**: Minikube (profile: `k8s136-in-action`) running Kubernetes 1.36
+- **Demo namespace**: `k8s136-demo`
+- **Tools**: kubectl, minikube, helm (installed; used by individual feature demos)
 - **No application code** — pure Kubernetes manifests and feature demos
 
 ## Project Structure
@@ -29,13 +30,13 @@ scripts/               # Numbered automation scripts (01–05)
 ## Scripts Convention
 
 All scripts are in `scripts/` and numbered sequentially:
-- `01-install-prerequisites.sh` — Installs minikube, kubectl via Homebrew
-- `02-start-cluster.sh` — Creates Minikube cluster with K8s 1.36 and required feature gates
-- `03-deploy-app.sh` — Deploys base resources for demos
-- `04-demo-scenarios.sh` — Interactive walkthrough of 1.36 features
-- `05-teardown.sh` — Destroys cluster (has confirmation prompt, cleans kubeconfig entries and CRDs)
+- `01-install-prerequisites.sh` — Verifies/installs minikube, kubectl, helm, docker via Homebrew
+- `02-start-cluster.sh` — Creates Minikube cluster on K8s 1.36 and enables `metrics-server` addon
+- `03-deploy-app.sh` — Applies the namespace, core resources, and feature-specific manifests (best-effort for CRD-dependent ones)
+- `04-demo-scenarios.sh` — Interactive walkthrough of nine 1.36 feature scenarios
+- `05-teardown.sh` — Destroys cluster (has confirmation prompt, cleans kubeconfig entries and cluster-scoped resources)
 
-Scripts use `#!/usr/bin/env bash` and `set -euo pipefail`.
+Scripts use `#!/usr/bin/env bash`, `set -euo pipefail`, and source `scripts/lib/common.sh` for shared helpers (colors, info/warn/error/header, profile/namespace constants).
 
 ## Key Concepts
 
@@ -48,7 +49,9 @@ Scripts use `#!/usr/bin/env bash` and `set -euo pipefail`.
 
 ## Conventions
 
-- All Kubernetes resources use the `k136-demo` namespace
+- All Kubernetes resources use the `k8s136-demo` namespace
 - Feature directories are organized by maturity level (stable → beta → alpha)
-- Emoji prefixes in script output for readability (🌸, ✅, 🗑️)
-- No Docker images — all demos use standard Kubernetes resources or public images
+- Color-coded `[INFO] / [WARN] / [ERROR]` script output from `scripts/lib/common.sh`
+- Container image tags are pinned (no bare `:latest`)
+- Pods that aren't specifically demonstrating a security feature apply Pod Security Standards (`restricted` profile)
+- No application code — all demos use standard Kubernetes resources or pinned public images

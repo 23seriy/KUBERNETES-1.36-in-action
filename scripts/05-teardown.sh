@@ -1,57 +1,50 @@
 #!/usr/bin/env bash
+# Tear down the Minikube cluster and clean up kubeconfig entries.
 set -euo pipefail
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
-
-info()  { echo -e "${GREEN}[INFO]${NC} $1"; }
-warn()  { echo -e "${YELLOW}[WARN]${NC} $1"; }
-error() { echo -e "${RED}[ERROR]${NC} $1"; }
-
-PROFILE="k8s136-in-action"
-NAMESPACE="k8s136-demo"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/common.sh
+source "$SCRIPT_DIR/lib/common.sh"
 
 echo "============================================"
 echo "  Kubernetes 1.36 in Action — Teardown"
 echo "============================================"
 echo ""
 
-read -p "This will delete the Minikube profile '$PROFILE' and all demo resources. Continue? (y/N) " -n 1 -r
+read -p "This will delete the Minikube profile '$MINIKUBE_PROFILE' and all demo resources. Continue? (y/N) " -n 1 -r
 echo
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     info "Teardown cancelled."
     exit 0
 fi
 
-# Clean up namespace resources if cluster is still accessible
-if kubectl config get-contexts | grep -q "$PROFILE"; then
-    info "Cleaning up demo namespace..."
-    kubectl delete namespace "$NAMESPACE" --ignore-not-found --timeout=60s || true
-    
-    # Clean up any lingering CRDs we may have created
-    info "Cleaning up any test CRDs..."
-    kubectl delete kubeletauthorizationpolicies --all -n "$NAMESPACE" --ignore-not-found 2>/dev/null || true
-    kubectl delete podgroups --all -n "$NAMESPACE" --ignore-not-found 2>/dev/null || true
-    kubectl delete volumegroupsnapshots --all -n "$NAMESPACE" --ignore-not-found 2>/dev/null || true
+# Delete demo namespace first — this removes all namespaced demo resources at once.
+if kubectl config get-contexts -o name 2>/dev/null | grep -q "^${MINIKUBE_PROFILE}$"; then
+    info "Deleting demo namespace..."
+    kubectl delete namespace "$DEMO_NAMESPACE" --ignore-not-found --timeout=60s || true
+
+    # Cluster-scoped resources that the namespace delete doesn't touch.
+    info "Removing cluster-scoped demo resources..."
+    kubectl delete mutatingadmissionpolicy demo-label-injector --ignore-not-found 2>/dev/null || true
+    kubectl delete mutatingadmissionpolicybinding demo-label-injector-binding --ignore-not-found 2>/dev/null || true
+    kubectl delete volumegroupsnapshotclass demo-group-snapclass --ignore-not-found 2>/dev/null || true
 else
-    warn "Context '$PROFILE' not found. Skipping namespace cleanup."
+    warn "Context '$MINIKUBE_PROFILE' not found. Skipping namespace cleanup."
 fi
 
 # Delete Minikube profile
-if minikube status -p "$PROFILE" &> /dev/null 2>&1; then
-    info "Deleting Minikube profile '$PROFILE'..."
-    minikube delete -p "$PROFILE"
+if minikube status -p "$MINIKUBE_PROFILE" &> /dev/null; then
+    info "Deleting Minikube profile '$MINIKUBE_PROFILE'..."
+    minikube delete -p "$MINIKUBE_PROFILE"
 else
-    warn "Minikube profile '$PROFILE' not found."
+    warn "Minikube profile '$MINIKUBE_PROFILE' not found."
 fi
 
 # Clean up any leftover kubeconfig entries
 info "Cleaning up kubectl contexts..."
-kubectl config delete-context "$PROFILE" 2>/dev/null || true
-kubectl config delete-cluster "$PROFILE" 2>/dev/null || true
-kubectl config unset "users.$PROFILE" 2>/dev/null || true
+kubectl config delete-context "$MINIKUBE_PROFILE" 2>/dev/null || true
+kubectl config delete-cluster "$MINIKUBE_PROFILE" 2>/dev/null || true
+kubectl config unset "users.$MINIKUBE_PROFILE" 2>/dev/null || true
 
 echo ""
 info "Teardown complete. All resources have been removed."
