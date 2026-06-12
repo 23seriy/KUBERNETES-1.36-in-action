@@ -22,61 +22,88 @@ spec:
       # Uncomment below on runtimes that support it (containerd 2.x + kernel 5.12+):
       # hostUsers: false
       serviceAccountName: demo-monitoring-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101         # nginx-unprivileged image runs as UID 101
+        runAsGroup: 101
+        fsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
       containers:
-      - name: web-server
-        image: nginx:1.25
-        ports:
-        - containerPort: 80
-          name: http
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
-            memory: "256Mi"
-            cpu: "200m"
-        volumeMounts:
-        - name: data-volume
-          mountPath: /usr/share/nginx/html/data
-        - name: logs-volume
-          mountPath: /var/log/nginx
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 80
-          initialDelaySeconds: 5
-          periodSeconds: 10
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 80
-          initialDelaySeconds: 15
-          periodSeconds: 20
-      - name: log-processor
-        image: alpine:3.18
-        command:
-        - /bin/sh
-        - -c
-        - |
-          echo "Log processor started at $(date)"
-          while true; do
-            echo "Processing logs at $(date)" >> /logs/processor.log
-            sleep 30
-          done
-        resources:
-          requests:
-            memory: "64Mi"
-            cpu: "50m"
-          limits:
-            memory: "128Mi"
-            cpu: "100m"
-        volumeMounts:
-        - name: logs-volume
-          mountPath: /logs
+        - name: web-server
+          # nginx-unprivileged listens on 8080 and runs as a non-root user,
+          # satisfying the PSS `restricted` profile out of the box.
+          image: nginxinc/nginx-unprivileged:1.27-alpine
+          ports:
+            - containerPort: 8080
+              name: http
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: data-volume
+              mountPath: /usr/share/nginx/html/data
+            - name: logs-volume
+              mountPath: /var/log/nginx
+            - name: nginx-cache
+              mountPath: /var/cache/nginx
+            - name: nginx-run
+              mountPath: /var/run
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20
+        - name: log-processor
+          image: alpine:3.20
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Log processor started at $(date)"
+              while true; do
+                echo "Processing logs at $(date)" >> /logs/processor.log
+                sleep 30
+              done
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: logs-volume
+              mountPath: /logs
       volumes:
-      - name: data-volume
-        persistentVolumeClaim:
-          claimName: demo-data-pvc
-      - name: logs-volume
-        persistentVolumeClaim:
-          claimName: demo-logs-pvc
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: demo-data-pvc
+        - name: logs-volume
+          persistentVolumeClaim:
+            claimName: demo-logs-pvc
+        - name: nginx-cache
+          emptyDir: {}
+        - name: nginx-run
+          emptyDir: {}

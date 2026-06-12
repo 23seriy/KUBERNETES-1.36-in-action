@@ -9,7 +9,7 @@ spec:
   selector:
     app: demo-app
   ports:
-  - port: 80
-    targetPort: 80
-    name: http
+    - name: http
+      port: 80         # external service port (unchanged for port-forward UX)
+      targetPort: 8080 # nginx-unprivileged listens on 8080
   type: ClusterIP

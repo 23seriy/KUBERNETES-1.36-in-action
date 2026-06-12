@@ -164,8 +164,6 @@ kubernetes-1.36-in-action/
 │   └── resource-health-status/README.md
 ├── alpha-features/                     # Alpha feature deep-dives
 │   └── workload-aware-scheduling/README.md
-├── deployment-examples/
-│   └── complete-k8s136-demo.yaml      # All-in-one integration reference
 ├── scripts/
 │   ├── 01-install-prerequisites.sh
 │   ├── 02-start-cluster.sh
