@@ -1,0 +1,85 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  shellcheck:
+    name: Shell Script Linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Run shellcheck on all scripts
+        run: shellcheck -x scripts/*.sh
+
+  yaml-lint:
+    name: YAML Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: Lint Kubernetes manifests
+        run: yamllint -d relaxed k8s/*.yaml
+
+  script-syntax:
+    name: Script Syntax Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Check bash syntax
+        run: |
+          for script in scripts/*.sh; do
+            echo "Checking $script"
+            bash -n "$script"
+          done
+
+  docs-check:
+    name: Documentation Completeness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Check required docs exist
+        run: |
+          files=(
+            "README.md"
+            "LICENSE"
+            ".gitignore"
+            "CONTRIBUTING.md"
+            "CODE_OF_CONDUCT.md"
+            "SECURITY.md"
+            "TESTING.md"
+            "TROUBLESHOOTING.md"
+            "CHANGELOG.md"
+            "CLAUDE.md"
+          )
+          for file in "${files[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "Missing: $file"
+              exit 1
+            fi
+          done
+          echo "All required documentation files present"
+
+  markdown-lint:
+    name: Markdown Linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: nosborn/github-action-markdown-cli@v3.5.0
+        with:
+          files: .
+          config_file: .markdownlint.json
+        continue-on-error: true
