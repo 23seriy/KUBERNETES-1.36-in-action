@@ -82,7 +82,7 @@ This installs or verifies `minikube`, `kubectl`, `helm`, and `docker`.
 ./scripts/02-start-cluster.sh
 ```
 
-This creates a Minikube profile called `k8s136-in-action` on **Kubernetes `v1.36.0`** and enables required addons (ingress, metrics-server).
+This creates a Minikube profile called `k8s136-in-action` on **Kubernetes `v1.36.0`** and enables the `metrics-server` addon (used by the HPA demo).
 
 ### Step 3: Deploy the Demo
 

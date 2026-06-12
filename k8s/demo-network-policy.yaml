@@ -1,3 +1,9 @@
+# NetworkPolicy for the demo app.
+# Deny-by-default ingress/egress; only allow:
+#   - ingress from other pods in the same namespace (e.g., demo-monitoring)
+#   - egress to cluster DNS and the Kubernetes API
+# Note: `kubectl port-forward` bypasses NetworkPolicy in most CNIs because the
+# traffic enters via the kubelet attaching to the pod's netns directly.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -8,27 +14,25 @@ spec:
     matchLabels:
       app: demo-app
   policyTypes:
-  - Ingress
-  - Egress
+    - Ingress
+    - Egress
   ingress:
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          name: ingress-nginx
-    ports:
-    - protocol: TCP
-      port: 80
+    - from:
+        - podSelector: {}  # any pod in the same namespace
+      ports:
+        - protocol: TCP
+          port: 80
   egress:
-  - to: []
-    ports:
-    - protocol: TCP
-      port: 53
-    - protocol: UDP
-      port: 53
-  - to:
-    - namespaceSelector:
-        matchLabels:
-          name: kube-system
-    ports:
-    - protocol: TCP
-      port: 443
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 53
+        - protocol: UDP
+          port: 53
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: TCP
+          port: 443

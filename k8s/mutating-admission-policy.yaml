@@ -25,12 +25,13 @@ spec:
           }
         }
 ---
-# Binding to activate the policy
+# Binding to activate the policy.
+# Note: MutatingAdmissionPolicyBinding does NOT take `validationActions` —
+# that field belongs to ValidatingAdmissionPolicyBinding. Mutations always
+# apply on match; failure semantics are governed by the policy itself.
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingAdmissionPolicyBinding
 metadata:
   name: demo-label-injector-binding
 spec:
   policyName: demo-label-injector
-  validationActions:
-  - Deny
